@@ -1,4 +1,7 @@
 node_modules
 dist
+# Allow the backend dist (needed for Render deployment per exercise 3.11)
+!part3/phonebook/dist
+!part3/phonebook/dist/**
 .env
 .DS_Store
