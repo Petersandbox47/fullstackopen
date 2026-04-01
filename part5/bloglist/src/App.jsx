@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
+import Togglable from './components/Togglable'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
@@ -13,7 +14,9 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [notification, setNotification] = useState({ message: null, type: 'success' })
 
-  // Exercise 5.2: load user from localStorage on mount
+  // Exercise 5.5: ref to close form after creation
+  const blogFormRef = useRef()
+
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
@@ -34,24 +37,20 @@ const App = () => {
     setTimeout(() => setNotification({ message: null, type: 'success' }), 5000)
   }
 
-  // Exercise 5.1: handle login
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
       const loggedUser = await loginService.login({ username, password })
-
-      // Exercise 5.2: save to localStorage
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(loggedUser))
       blogService.setToken(loggedUser.token)
       setUser(loggedUser)
       setUsername('')
       setPassword('')
-    } catch (error) {
+    } catch (_error) {
       showNotification('wrong username or password', 'error')
     }
   }
 
-  // Exercise 5.2: handle logout
   const handleLogout = () => {
     window.localStorage.removeItem('loggedBlogappUser')
     blogService.setToken(null)
@@ -59,18 +58,39 @@ const App = () => {
     setBlogs([])
   }
 
-  // Exercise 5.3: handle blog creation
+  // Exercise 5.5/5.6: close togglable after creation
   const handleCreateBlog = async (newBlog) => {
     try {
       const created = await blogService.create(newBlog)
       setBlogs(blogs.concat(created))
       showNotification(`a new blog ${created.title} by ${created.author} added`)
-    } catch (error) {
+      blogFormRef.current.toggleVisibility()
+    } catch (_error) {
       showNotification('failed to create blog', 'error')
     }
   }
 
-  // Exercise 5.1: show login form if not logged in
+  // Exercise 5.8/5.9: like handler - preserve populated user after PUT
+  const handleLike = async (blog) => {
+    const updatedBlog = {
+      title: blog.title,
+      author: blog.author,
+      url: blog.url,
+      likes: blog.likes + 1,
+      user: blog.user?.id || blog.user,
+    }
+    const returned = await blogService.update(blog.id, updatedBlog)
+    setBlogs(blogs.map((b) => (b.id !== blog.id ? b : { ...returned, user: blog.user })))
+  }
+
+  // Exercise 5.11: delete handler
+  const handleDelete = async (blog) => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
+      await blogService.remove(blog.id)
+      setBlogs(blogs.filter((b) => b.id !== blog.id))
+    }
+  }
+
   if (!user) {
     return (
       <div>
@@ -86,6 +106,9 @@ const App = () => {
     )
   }
 
+  // Exercise 5.10: sort blogs by likes descending
+  const sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes)
+
   return (
     <div>
       <h2>blogs</h2>
@@ -94,11 +117,20 @@ const App = () => {
         {user.name} logged in <button onClick={handleLogout}>logout</button>
       </p>
 
-      <BlogForm onCreate={handleCreateBlog} />
+      {/* Exercise 5.5: wrap BlogForm in Togglable */}
+      <Togglable buttonLabel="create new blog" ref={blogFormRef}>
+        <BlogForm onCreate={handleCreateBlog} />
+      </Togglable>
 
       <h3>blog list</h3>
-      {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} />
+      {sortedBlogs.map((blog) => (
+        <Blog
+          key={blog.id}
+          blog={blog}
+          onLike={handleLike}
+          onDelete={handleDelete}
+          currentUser={user}
+        />
       ))}
     </div>
   )
