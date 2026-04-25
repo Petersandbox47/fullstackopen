@@ -1,15 +1,16 @@
-import { useDispatch } from 'react-redux'
-import { createAnecdote } from '../reducers/anecdoteReducer'
+import useAnecdoteStore from '../stores/anecdoteStore'
+import useNotificationStore from '../stores/notificationStore'
 
-// Exercise 6.7: AnecdoteForm component
 const AnecdoteForm = () => {
-  const dispatch = useDispatch()
+  const createAnecdote = useAnecdoteStore((state) => state.createAnecdote)
+  const showNotification = useNotificationStore((state) => state.showNotification)
 
-  const addAnecdote = (event) => {
+  const addAnecdote = async (event) => {
     event.preventDefault()
     const content = event.target.anecdote.value
     event.target.anecdote.value = ''
-    dispatch(createAnecdote(content))
+    await createAnecdote(content)
+    showNotification(`you created '${content}'`)
   }
 
   return (
