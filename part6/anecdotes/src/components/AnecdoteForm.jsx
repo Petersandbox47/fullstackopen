@@ -1,16 +1,25 @@
-import useAnecdoteStore from '../stores/anecdoteStore'
-import useNotificationStore from '../stores/notificationStore'
+import { useCreateAnecdote } from '../hooks/useAnecdotes'
+import { useNotification } from '../context/NotificationContext'
 
 const AnecdoteForm = () => {
-  const createAnecdote = useAnecdoteStore((state) => state.createAnecdote)
-  const showNotification = useNotificationStore((state) => state.showNotification)
+  const createMutation = useCreateAnecdote()
+  const { showNotification } = useNotification()
 
+  // Exercise 6.17: create anecdote with mutation
   const addAnecdote = async (event) => {
     event.preventDefault()
     const content = event.target.anecdote.value
     event.target.anecdote.value = ''
-    await createAnecdote(content)
-    showNotification(`you created '${content}'`)
+
+    // Exercise 6.21: error handling for too-short content
+    createMutation.mutate(content, {
+      onSuccess: () => {
+        showNotification(`you created '${content}'`)
+      },
+      onError: () => {
+        showNotification('too short anecdote, must have length 5 or more')
+      },
+    })
   }
 
   return (

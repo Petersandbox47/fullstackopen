@@ -1,22 +1,26 @@
-import { useEffect } from 'react'
 import AnecdoteList from './components/AnecdoteList'
 import AnecdoteForm from './components/AnecdoteForm'
 import Notification from './components/Notification'
-import useAnecdoteStore from './stores/anecdoteStore'
+import { useAnecdotes } from './hooks/useAnecdotes'
 
 const App = () => {
-  const initializeAnecdotes = useAnecdoteStore((state) => state.initializeAnecdotes)
+  // Exercise 6.16: fetch anecdotes with React Query
+  const { data: anecdotes, isLoading, isError } = useAnecdotes()
 
-  useEffect(() => {
-    initializeAnecdotes()
-  }, [initializeAnecdotes])
+  if (isLoading) {
+    return <div>loading anecdotes...</div>
+  }
+
+  if (isError) {
+    return <div>anecdote service not available due to problems in server</div>
+  }
 
   return (
     <div>
       <h2>Anecdotes</h2>
       <Notification />
       <AnecdoteForm />
-      <AnecdoteList />
+      <AnecdoteList anecdotes={anecdotes} />
     </div>
   )
 }

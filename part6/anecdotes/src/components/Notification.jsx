@@ -1,9 +1,9 @@
-import useNotificationStore from '../stores/notificationStore'
+import { useNotification } from '../context/NotificationContext'
 
 const Notification = () => {
-  const message = useNotificationStore((state) => state.message)
+  const { notification } = useNotification()
 
-  if (!message) return null
+  if (!notification) return null
 
   const style = {
     border: 'solid',
@@ -12,7 +12,7 @@ const Notification = () => {
     marginBottom: 10,
   }
 
-  return <div style={style}>{message}</div>
+  return <div style={style}>{notification}</div>
 }
 
 export default Notification
