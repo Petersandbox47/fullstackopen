@@ -60,6 +60,18 @@ blogsRouter.delete('/:id', userExtractor, async (req, res, next) => {
   }
 })
 
+blogsRouter.post('/:id/comments', async (req, res, next) => {
+  try {
+    const blog = await Blog.findById(req.params.id)
+    if (!blog) return res.status(404).end()
+    blog.comments = blog.comments.concat(req.body.comment)
+    const saved = await blog.save()
+    res.json(saved)
+  } catch (error) {
+    next(error)
+  }
+})
+
 blogsRouter.put('/:id', async (req, res, next) => {
   try {
     const updated = await Blog.findByIdAndUpdate(req.params.id, req.body, {
