@@ -1,0 +1,41 @@
+body {
+  font-family: Arial, sans-serif;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+nav {
+  background: #f0f0f0;
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+nav a {
+  margin-right: 15px;
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
+
+nav a:hover {
+  color: #0066cc;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+button {
+  margin-left: 5px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
